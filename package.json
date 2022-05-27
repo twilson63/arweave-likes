@@ -1,0 +1,23 @@
+{
+  "name": "arweave-likes",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "repository": "https://github.com/twilson63/arweave-likes.git",
+  "author": "Tom Wilson <tom@hyper.io>",
+  "license": "MIT",
+  "dependencies": {
+    "crocks": "^0.12.4",
+    "ramda": "^0.28.0"
+  },
+  "devDependencies": {
+    "arlocal": "^1.1.38",
+    "arweave": "^1.10.23",
+    "microbundle": "^0.15.0",
+    "uvu": "^0.5.3"
+  },
+  "scripts": {
+    "build": "microbundle",
+    "test": "uvu tests"
+  }
+}
