@@ -1,14 +1,20 @@
 # Arweave-Likes
 
-Every data transaction on Arweave should be capable of being liked by a user, just once and only once. Also, they should be capable of unliking an Arweave data transaction as well. This module provides the functionality to like a data transaction and unlike a data transaction.
+Every data transaction on Arweave should be capable of being liked by a user, just once and only once. Also, they should be capable of unliking an Arweave data transaction as well. This module provides the functionality to like a data transaction and unlike a data transaction. As well as allowing the dApp to establish a price to like transactions for the creator. 
 
 > Browser Only
+
+## Init
+
+* arweave : Arweave(JS)
+* price : winston // amount each like and unlike costs
 
 ## API
 
 * like
 * unlike
 * count
+* subscribe fn // for events
 
 ## Challenges
 
@@ -27,5 +33,9 @@ So the injected cache must match a specific API so that any cache system can be 
   remove(key)
 }
 ```
+
+It is important that the count retrieves the count from the cache if possible, and get the last block height, then query arweave to get the newest transactions and update the count and dispatch another transaction to update the count.
+
+Another important note is that it should cost some AR for each like and unlike, the AR should go to the creator/owner of the data item, and the count transactions should only find transactions of the like protocol that paid the amount of AR to the owner of the data.
 
 
