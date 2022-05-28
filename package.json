@@ -2,7 +2,14 @@
   "name": "arweave-likes",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "source": "src/index.js",
+  "exports": {
+    "require": "./dist/index.cjs",
+    "default": "./dist/index.modern.js"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.module.js",
+  "unpkg": "./dist/index.umd.js",
   "repository": "https://github.com/twilson63/arweave-likes.git",
   "author": "Tom Wilson <tom@hyper.io>",
   "license": "MIT",
