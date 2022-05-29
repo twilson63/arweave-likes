@@ -9,9 +9,11 @@ const { compose, equals, find, map, path, pluck, prop, propEq, reduce, reject, u
  * @param {string} price - price to like a transaction
  * @param {Cache} cache - cache service that supports get, set, remove, query
  */
-export default function (arweave, price) {
+export default function (arweave, price, cache) {
   const post = Async.fromPromise(arweave.api.post.bind(arweave.api))
   const gql = query => post('graphql', { query })
+  const cacheInc = ({ id }) => Async.fromPromise(cache.inc.bind(cache))(id)
+  const cacheDec = ({ id }) => Async.fromPromise(cache.dec.bind(cache))(id)
 
   const createTx = Async.fromPromise(arweave.createTransaction.bind(arweave))
   const dispatch = Async.fromPromise(async (tx) => {
@@ -29,6 +31,7 @@ export default function (arweave, price) {
   function like(txId, walletAddress) {
     return Async.of({ tx: txId, addr: walletAddress })
       .chain(canLike)
+      .map(data => ({ data, target: data.owner, quantity: price }))
       .chain(createTx)
       .map(tx => {
         tx.addTag('Content-Type', 'application/json')
@@ -36,6 +39,8 @@ export default function (arweave, price) {
         tx.addTag('TxId', txId)
       })
       .chain(dispatch)
+      .chain(cacheIncrement)
+      .toPromise()
 
   }
 
@@ -46,6 +51,7 @@ export default function (arweave, price) {
   function unlike(txId, walletAddress) {
     return Async.of({ tx: txId, addr: walletAddress, status: 'inactive' })
       .chain(canUnlike)
+      .map(data => ({ data, target: data.owner, quantity: price }))
       .chain(createTx)
       .map(tx => {
         tx.addTag('Content-Type', 'application/json')
@@ -54,7 +60,16 @@ export default function (arweave, price) {
         tx.addTag('Status', 'inactive')
       })
       .chain(dispatch)
+      .toPromise()
 
+  }
+
+  function count(txId) {
+    return Async.of(txId)
+      // cache get
+      // if not null send number and queue recount
+
+      .toPromise()
   }
 
   return Object.freeze({
