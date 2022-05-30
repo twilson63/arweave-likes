@@ -7,21 +7,20 @@ const { compose, equals, find, map, path, pluck, prop, propEq, reduce, reject, u
 /**
  * @param {Arweave} arweave
  * @param {string} price - price to like a transaction
- * @param {Cache} cache - cache service that supports get, set, remove, query
+ * @param {Cache} cache? - cache service that supports get, set, remove, query
  */
 export default function (arweave, price, cache) {
   const post = Async.fromPromise(arweave.api.post.bind(arweave.api))
   const gql = query => post('graphql', { query })
-  const cacheInc = ({ id }) => Async.fromPromise(cache.inc.bind(cache))(id)
-  const cacheDec = ({ id }) => Async.fromPromise(cache.dec.bind(cache))(id)
+  // const cacheInc = ({ id }) => Async.fromPromise(cache.inc.bind(cache))(id)
+  // const cacheDec = ({ id }) => Async.fromPromise(cache.dec.bind(cache))(id)
 
   const createTx = Async.fromPromise(arweave.createTransaction.bind(arweave))
   const dispatch = Async.fromPromise(async (tx) => {
     if (global.arweaveWallet) {
       return await arweaveWallet.dispatch(tx)
     }
-    await arweave.transactions.sign(tx)
-    await arweave.transactions.post(tx)
+    return Promise.reject(new Error('Only supports arweaveWallet environments'))
   })
 
   /**
@@ -35,7 +34,7 @@ export default function (arweave, price, cache) {
       .chain(createTx)
       .map(tx => {
         tx.addTag('Content-Type', 'application/json')
-        tx.addTag('Protocol', 'likes')
+        tx.addTag('Protocol', 'Likes')
         tx.addTag('TxId', txId)
       })
       .chain(dispatch)
@@ -79,10 +78,29 @@ export default function (arweave, price, cache) {
   })
 }
 
-function likesQuery(tx) {
-  return `
+function buildLikesQuery(price) {
+  return function (tx) {
+    return `
 query {
-  transactions()
+  transactions(
+    first: 100,
+    tags: [
+    {name: "Protocol", values: ["Likes"]},
+    {name: "TxId", values: ["${tx}"]}
+  ], quantity: "${price}") {
+    edges {
+      node {
+        id
+        quantity
+        target
+        tags {
+          name
+          value
+        }
+      }
+    }
+  }
 }
   `
+  }
 }
